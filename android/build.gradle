@@ -1,0 +1,24 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.1.0'
+    }
+}
+
+ext {
+    appPackageName = 'com.dgsd.android.sydtrip'
+
+    releaseStoreFile = System.getenv("DGSD_RELEASE_STORE_FILE")
+    releaseStorePassword = System.getenv("DGSD_RELEASE_STORE_PASSWORD")
+    releaseStoreAlias = System.getenv("DGSD_RELEASE_KEY_ALIAS")
+    releaseStoreAliasPassword = System.getenv("DGSD_RELEASE_KEY_PASSWORD")
+}
+
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}

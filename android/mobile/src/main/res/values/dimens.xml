@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="default_padding">16dp</dimen>
+    <dimen name="routing_result_vertical_padding">8dp</dimen>
+    <dimen name="routing_result_internal_padding">8dp</dimen>
+    <dimen name="routing_result_list_item_countdown_width">80dp</dimen>
+    <dimen name="routing_result_list_item_countdown_text_size">18sp</dimen>
+    <dimen name="divider_height">1px</dimen>
+    <dimen name="routing_result_list_item_time_text_size">20sp</dimen>
+</resources>

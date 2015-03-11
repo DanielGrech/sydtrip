@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.dgsd.android.sydtrip.view.RoutingResultListItemView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/routing_result_vertical_padding"
+    android:paddingBottom="@dimen/routing_result_vertical_padding"
+    android:layout_marginBottom="@dimen/divider_height"
+    android:background="?attr/selectableItemBackground">
+
+    <TextView
+        android:id="@+id/time_until"
+        android:layout_width="@dimen/routing_result_list_item_countdown_width"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:maxLines="3"
+        android:textSize="@dimen/routing_result_list_item_countdown_text_size"
+        android:textColor="@android:color/white"/>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/routing_result_internal_padding"
+        android:gravity="left"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/depart_platform"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/depart_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/primary_text"
+            android:textSize="@dimen/routing_result_list_item_time_text_size"
+            android:fontFamily="sans-serif-medium"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/routing_result_internal_padding"
+        android:gravity="right"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/arrival_platform"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/arrival_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/primary_text"
+            android:textSize="@dimen/routing_result_list_item_time_text_size"
+            android:fontFamily="sans-serif-medium"/>
+
+    </LinearLayout>
+
+</com.dgsd.android.sydtrip.view.RoutingResultListItemView>

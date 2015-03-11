@@ -1,0 +1,38 @@
+
+apply plugin:'application'
+
+mainClassName = "com.dgsd.sydtrip.transformer.Application"
+applicationDefaultJvmArgs = [
+        '-Xmx5148m'
+]
+
+run {
+    systemProperty "java.util.logging.SimpleFormatter.format", '%1$tH:%1$tM:%1$tS %4$-6s %2$s %5$s%6$s%n'
+    args '/Users/daniel/Desktop/gtfs_sydney', '/Users/daniel/Desktop/gtfs_output'
+    jvmArgs applicationDefaultJvmArgs
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+}
+
+dependencies {
+    compile 'org.apache.commons:commons-lang3:3.3.2'
+    compile 'org.apache.commons:commons-io:1.3.2'
+    compile 'net.sf.opencsv:opencsv:2.3'
+    compile 'org.xerial:sqlite-jdbc:3.8.5-pre1'
+    compile 'org.tukaani:xz:1.5'
+}
+
+test {
+    testLogging {
+        events 'passed', 'failed'
+        displayGranularity 2
+        showExceptions true
+        showStackTraces true
+        showCauses true
+        exceptionFormat 'full'
+    }
+}

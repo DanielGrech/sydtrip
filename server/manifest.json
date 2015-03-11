@@ -1,0 +1,21 @@
+{
+	"version" : 1, 
+	"files" : [
+		{
+			url : "files/rail.zip",
+			type : "RAIL"
+		},
+		{
+			url : "files/ferry.zip",
+			type : "FERRY"
+		},
+		{
+			url : "files/lightrail.zip",
+			type : "LIGHTRAIL"
+		},
+		{
+			url : "files/bus.zip",
+			type : "BUS"
+		}
+	]
+}

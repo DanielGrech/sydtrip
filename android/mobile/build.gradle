@@ -1,0 +1,67 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
+
+    packagingOptions {
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+    }
+
+    defaultConfig {
+        applicationId rootProject.ext.appPackageName.toString()
+        minSdkVersion 16
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+
+        resValue "string", "app_name", "SydTrip"
+
+        buildConfigField "String", "UPDATE_URL_ENDPOINT", "\"http://192.168.43.55:8000\""
+    }
+
+    signingConfigs {
+        release {
+            if (rootProject.ext.releaseStoreFile != null) {
+                storeFile file(rootProject.ext.releaseStoreFile)
+                storePassword rootProject.ext.releaseStorePassword
+                keyAlias rootProject.ext.releaseStoreAlias
+                keyPassword rootProject.ext.releaseStoreAliasPassword
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+//            applicationIdSuffix '.debug'
+            versionNameSuffix "-debug"
+
+            resValue "string", "app_name", "SydTrip Debug"
+        }
+
+        release {
+//            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    wearApp project(':wear')
+    compile project(":models")
+    compile project(":data")
+    compile project(":routing")
+    compile project(":updater")
+    compile 'com.google.android.gms:play-services:6.5.87'
+    compile 'com.android.support:appcompat-v7:21.0.3'
+    compile 'com.android.support:recyclerview-v7:21.0.0'
+    compile 'com.jakewharton.timber:timber:2.7.1'
+    compile 'com.jakewharton:butterknife:6.0.0'
+    compile 'io.reactivex:rxandroid:0.24.0'
+    compile 'com.getbase:floatingactionbutton:1.8.0'
+}
