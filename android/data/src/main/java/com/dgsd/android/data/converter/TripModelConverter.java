@@ -23,6 +23,7 @@ public class TripModelConverter implements DbToModelConverter<DbTrip, Trip> {
     public Trip convert(DbTrip dbTrip) {
         // TODO: Direction!
         return new Trip(dbTrip.getId(), dbTrip.getHeadSign(), null,
-                dbTrip.getBlockId(), dbTrip.getWheelchairAccess() > 0, dbTrip.getRouteId());
+                dbTrip.getBlockId(), dbTrip.getWheelchairAccess() > 0, dbTrip.getRouteId(),
+                dbTrip.getStopTimeId());
     }
 }

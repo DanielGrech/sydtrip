@@ -9,10 +9,12 @@ import com.dgsd.android.data.model.DbStop;
 import com.dgsd.android.data.model.DbStopTime;
 import com.dgsd.android.data.model.DbTrip;
 
+import java.util.Collections;
 import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmObject;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
 public class RealmDatabaseBackend implements DatabaseBackend {
@@ -42,9 +44,23 @@ public class RealmDatabaseBackend implements DatabaseBackend {
             return new int[0];
         }
 
-        final int[] retval = new int[results.size()];
+        final int[] stopTimeIds = new int[results.size()];
         for (int i = 0, len = results.size(); i < len; i++) {
-            retval[i] = results.get(i).getTripId();
+            stopTimeIds[i] = results.get(i).getStopTimeId();
+        }
+
+        RealmQuery<DbTrip> query = getRealm().where(DbTrip.class);
+        for (int i = 0, len = stopTimeIds.length; i < len; i++) {
+            if (i != 0) {
+                query = query.or();
+            }
+            query = query.equalTo(Contract.Trips.COL_STOP_TIME_ID, stopTimeIds[i]);
+        }
+
+        final RealmResults<DbTrip> dbTripResults = query.findAll();
+        final int[] retval = new int[dbTripResults.size()];
+        for (int i = 0, len = retval.length; i < len; i++) {
+            retval[i] = dbTripResults.get(i).getId();
         }
 
         return retval;
@@ -93,9 +109,17 @@ public class RealmDatabaseBackend implements DatabaseBackend {
 
     @Override
     public List<DbStopTime> getStopTimes(final int tripId) {
-        return getRealm().where(DbStopTime.class)
-                .equalTo(Contract.StopTimes.COL_TRIP_ID, tripId)
-                .findAllSorted(Contract.StopTimes.COL_SECONDS_SINCE_MIDNIGHT);
+        final Realm realm = getRealm();
+
+
+        final DbTrip trip = getTrip(tripId);
+        if (trip == null) {
+            return Collections.emptyList();
+        } else {
+            return realm.where(DbStopTime.class)
+                    .equalTo(Contract.StopTimes.COL_STOP_TIME_ID, trip.getStopTimeId())
+                    .findAllSorted(Contract.StopTimes.COL_SECONDS_SINCE_MIDNIGHT);
+        }
     }
 
     @Override

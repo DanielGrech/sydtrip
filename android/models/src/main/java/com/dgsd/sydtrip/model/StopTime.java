@@ -4,13 +4,13 @@ public final class StopTime extends BaseModel {
 
     private final int stopId;
 
-    private final int tripId;
+    private final int stopTimeId;
 
     private final int secondsSinceMidnight;
 
-    public StopTime(int stopId, int tripId, int secondsSinceMidnight) {
+    public StopTime(int stopId, int stopTimeId, int secondsSinceMidnight) {
         this.stopId = stopId;
-        this.tripId = tripId;
+        this.stopTimeId = stopTimeId;
         this.secondsSinceMidnight = secondsSinceMidnight;
     }
 
@@ -18,8 +18,8 @@ public final class StopTime extends BaseModel {
         return stopId;
     }
 
-    public int getTripId() {
-        return tripId;
+    public int getStopTimeId() {
+        return stopTimeId;
     }
 
     public int getSecondsSinceMidnight() {
@@ -37,14 +37,14 @@ public final class StopTime extends BaseModel {
         }
 
         final StopTime stopTime = (StopTime) o;
-        return this.stopId == stopTime.stopId && this.tripId == stopTime.tripId
+        return this.stopId == stopTime.stopId && this.stopTimeId == stopTime.stopTimeId
                 && this.secondsSinceMidnight == stopTime.secondsSinceMidnight;
     }
 
     @Override
     public int hashCode() {
         int result = stopId;
-        result = 31 * result + tripId;
+        result = 31 * result + stopTimeId;
         result = 31 * result + secondsSinceMidnight;
         return result;
     }

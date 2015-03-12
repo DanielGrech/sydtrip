@@ -86,9 +86,9 @@ public interface DatabaseBackend {
         public static final class StopTimes {
             public static final String TABLE_NAME = "stop_times";
 
-            public static final String COL_TRIP_ID = "tripId";
             public static final String COL_STOP_ID = "stopId";
             public static final String COL_SECONDS_SINCE_MIDNIGHT = "secondsSinceMidnight";
+            public static final String COL_STOP_TIME_ID = "stopTimeId";
 
         }
 
@@ -101,6 +101,7 @@ public interface DatabaseBackend {
             public static final String COL_BLOCK_ID = "blockId";
             public static final String COL_WHEELCHAIR_ACCESS = "wheelchairAccess";
             public static final String COL_ROUTE_ID = "routeId";
+            public static final String COL_STOP_TIME_ID = "stopTimeId";
         }
 
         public static final class Routes {

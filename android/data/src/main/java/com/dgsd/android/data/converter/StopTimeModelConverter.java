@@ -21,7 +21,7 @@ public class StopTimeModelConverter implements DbToModelConverter<DbStopTime, St
 
     @Override
     public StopTime convert(DbStopTime dbStopTime) {
-        return new StopTime(dbStopTime.getStopId(), dbStopTime.getTripId(),
+        return new StopTime(dbStopTime.getStopId(), dbStopTime.getStopTimeId(),
                 dbStopTime.getSecondsSinceMidnight());
     }
 }

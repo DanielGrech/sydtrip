@@ -5,6 +5,7 @@ import io.realm.RealmObject;
 import static com.dgsd.android.data.model.ModelUtils.assertImport;
 import static com.dgsd.android.data.model.ModelUtils.getInt;
 
+@SuppressWarnings("unused")
 public class DbCalendarInfoEx extends RealmObject {
 
     private int tripId;

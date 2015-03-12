@@ -18,13 +18,16 @@ public final class Trip extends BaseModel {
 
     private final int routeId;
 
-    public Trip(int id, String headSign, Direction direction, String blockId, boolean wheelchairAccess, int routeId) {
+    private final int stopTimeId;
+
+    public Trip(int id, String headSign, Direction direction, String blockId, boolean wheelchairAccess, int routeId, int stopTimeId) {
         this.id = id;
         this.headSign = headSign;
         this.direction = direction;
         this.blockId = blockId;
         this.wheelchairAccess = wheelchairAccess;
         this.routeId = routeId;
+        this.stopTimeId = stopTimeId;
     }
 
     public int getId() {
@@ -49,6 +52,10 @@ public final class Trip extends BaseModel {
 
     public int getRouteId() {
         return routeId;
+    }
+
+    public int getStopTimeId() {
+        return stopTimeId;
     }
 
     @Override

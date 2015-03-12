@@ -7,6 +7,7 @@ import static com.dgsd.android.data.model.ModelUtils.assertImport;
 import static com.dgsd.android.data.model.ModelUtils.getFloat;
 import static com.dgsd.android.data.model.ModelUtils.getInt;
 
+@SuppressWarnings("unused")
 public class DbStop extends RealmObject {
 
     @Ignore
