@@ -8,11 +8,13 @@ import com.dgsd.android.data.converter.TripModelConverter;
 import com.dgsd.android.data.db.DatabaseBackend;
 import com.dgsd.android.data.model.DbCalendarInfo;
 import com.dgsd.android.data.model.DbCalendarInfoEx;
+import com.dgsd.android.data.model.DbGraphEdge;
 import com.dgsd.android.data.model.DbRoute;
 import com.dgsd.android.data.model.DbStop;
 import com.dgsd.android.data.model.DbStopTime;
 import com.dgsd.android.data.model.DbTrip;
 import com.dgsd.sydtrip.model.CalendarInfo;
+import com.dgsd.sydtrip.model.GraphEdge;
 import com.dgsd.sydtrip.model.Route;
 import com.dgsd.sydtrip.model.Stop;
 import com.dgsd.sydtrip.model.StopTime;
@@ -28,6 +30,8 @@ import rx.functions.Func2;
 public class DataSource {
 
     private final DatabaseBackend db;
+
+    private Observable<List<GraphEdge>> networkObservable;
 
     public DataSource(DatabaseBackend dbBackend) {
         this.db = dbBackend;
@@ -58,6 +62,38 @@ public class DataSource {
                 return Observable.just(db.getStopIdsAtSameLocation(stopId));
             }
         });
+    }
+
+    public Observable<List<GraphEdge>> getNetwork() {
+        if (networkObservable == null) {
+            networkObservable = Observable.defer(new Func0<Observable<List<DbGraphEdge>>>() {
+                @Override
+                public Observable<List<DbGraphEdge>> call() {
+                    return Observable.just(db.getNetwork());
+                }
+            }).flatMap(new Func1<List<DbGraphEdge>, Observable<DbGraphEdge>>() {
+                @Override
+                public Observable<DbGraphEdge> call(List<DbGraphEdge> dbGraphEdges) {
+                    return Observable.from(dbGraphEdges);
+                }
+            }).flatMap(new Func1<DbGraphEdge, Observable<GraphEdge>>() {
+                @Override
+                public Observable<GraphEdge> call(final DbGraphEdge dbGraphEdge) {
+                    return Observable.combineLatest(
+                            getStop(dbGraphEdge.getFromStop()),
+                            getStop(dbGraphEdge.getToStop()),
+                            new Func2<Stop, Stop, GraphEdge>() {
+                                @Override
+                                public GraphEdge call(Stop from, Stop to) {
+                                    return new GraphEdge(from, to, dbGraphEdge.getCost());
+                                }
+                            }
+                    );
+                }
+            }).toList().cache();
+        }
+
+        return networkObservable;
     }
 
     public Observable<Stop> getStop(final int stopId) {
@@ -218,5 +254,9 @@ public class DataSource {
 
     public void saveCalendarInfoEx(List<DbCalendarInfoEx> calInfoEx) {
         db.saveCalendarInfoEx(calInfoEx);
+    }
+
+    public void saveGraphEdges(List<DbGraphEdge> edges) {
+        db.saveGraphEdges(edges);
     }
 }

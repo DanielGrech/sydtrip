@@ -2,6 +2,7 @@ package com.dgsd.android.data.db;
 
 import com.dgsd.android.data.model.DbCalendarInfo;
 import com.dgsd.android.data.model.DbCalendarInfoEx;
+import com.dgsd.android.data.model.DbGraphEdge;
 import com.dgsd.android.data.model.DbRoute;
 import com.dgsd.android.data.model.DbStop;
 import com.dgsd.android.data.model.DbStopTime;
@@ -16,6 +17,8 @@ public interface DatabaseBackend {
     public int[] getStopIdsForTrip(int tripId);
 
     public int[] getStopIdsAtSameLocation(int stopId);
+
+    public List<DbGraphEdge> getNetwork();
 
     public List<DbStop> getStops();
 
@@ -40,6 +43,8 @@ public interface DatabaseBackend {
     public void saveCalendarInfo(List<DbCalendarInfo> calInfo);
 
     public void saveCalendarInfoEx(List<DbCalendarInfoEx> calInfoEx);
+
+    public void saveGraphEdges(List<DbGraphEdge> edges);
 
     public static final class Contract {
         private Contract() {

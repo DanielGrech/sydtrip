@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.dgsd.android.data.model.DbCalendarInfo;
 import com.dgsd.android.data.model.DbCalendarInfoEx;
+import com.dgsd.android.data.model.DbGraphEdge;
 import com.dgsd.android.data.model.DbRoute;
 import com.dgsd.android.data.model.DbStop;
 import com.dgsd.android.data.model.DbStopTime;
@@ -103,6 +104,11 @@ public class RealmDatabaseBackend implements DatabaseBackend {
     }
 
     @Override
+    public List<DbGraphEdge> getNetwork() {
+        return getRealm().where(DbGraphEdge.class).findAll();
+    }
+
+    @Override
     public List<DbStop> getStops() {
         return getRealm().where(DbStop.class).findAll();
     }
@@ -154,6 +160,11 @@ public class RealmDatabaseBackend implements DatabaseBackend {
     @Override
     public void saveCalendarInfoEx(List<DbCalendarInfoEx> calInfoEx) {
         save(DbCalendarInfoEx.class, calInfoEx);
+    }
+
+    @Override
+    public void saveGraphEdges(List<DbGraphEdge> edges) {
+        save(DbGraphEdge.class, edges);
     }
 
     @Override

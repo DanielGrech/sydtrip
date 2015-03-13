@@ -185,13 +185,39 @@ public class Application {
                 });
             });
 
+            Set<GraphEdge> edges = new HashSet<>();
+            tripsForType.forEach(trip -> {
+                for (int i = 0, len = trip.getStops().size(); i < len; i++) {
+                    final StopTime current = trip.getStops().get(i);
+                    final StopTime prev = i == 0 ? null : trip.getStops().get(i - 1);
+
+                    if (prev != null) {
+                        final int from = prev.getStopId();
+                        final int to = current.getStopId();
+                        final int cost = current.getTime() - prev.getTime();
+
+                        edges.add(new GraphEdge(from, to, cost));
+                    }
+                }
+            });
+
+            final Map<Integer, Stop> stopIdToStop
+                    = stops.stream().collect(toMap(stop -> stop.getId(), stop -> stop));
+
+
+            final Set<GraphEdge> graph = edges.stream()
+                    .map(edge -> edgeFromParents(edge, stopIdToStop))
+                    .collect(toSet());
+
             // Add parent stops
-            stopIds.addAll(stops.parallelStream()
-                    .filter(s -> s.getParentStopId() > 0)
-                    .filter(s -> stopIds.contains(s.getId()))
-                    .mapToInt(Stop::getParentStopId)
-                    .boxed()
-                    .collect(toList()));
+            stopIds.addAll(
+                    stops.parallelStream()
+                            .filter(s -> s.getParentStopId() > 0)
+                            .filter(s -> stopIds.contains(s.getId()))
+                            .mapToInt(Stop::getParentStopId)
+                            .boxed()
+                            .collect(toList())
+            );
 
             final List<Stop> stopsForType = stops.parallelStream()
                     .filter(stop -> stopIds.contains(stop.getId()))
@@ -199,18 +225,21 @@ public class Application {
 
             stopsForType.forEach(s -> s.setStopType(type));
 
-            new CSVOutput(databaseFilePath + folderName).persist(tripsForType, stopsForType);
-
-//            final String dbFile = databaseFilePath + dbName;
-//            try (final Database database = new Database(dbFile)) {
-//                database.create();
-//                database.persist(tripsForType, stopsForType);
-//
-//                LOG.info("Compressing " + dbFile);
-//                CompressionUtils.compress(dbFile, dbFile.replace(".db", ".xz"));
-//                LOG.info("Compressed to " + dbFile.replace(".db", ".xz"));
-//            }
+            new CSVOutput(databaseFilePath + folderName)
+                    .persist(tripsForType, stopsForType, graph);
         });
+    }
+
+    private GraphEdge edgeFromParents(GraphEdge edge, Map<Integer, Stop> stopIdToStop) {
+        final Stop from = stopIdToStop.get(edge.getFrom());
+        final Stop to = stopIdToStop.get(edge.getTo());
+
+        final int fromIdToUse = from == null || from.getParentStopId() <= 0 ?
+                edge.getFrom() : from.getParentStopId();
+        final int toIdToUse = to == null || to.getParentStopId() <= 0 ?
+                edge.getTo() : to.getParentStopId();
+
+        return new GraphEdge(fromIdToUse, toIdToUse, edge.getCost());
     }
 
     private GtfsFileWithStagingModels processGtfsFile(Pair<File, GtfsFile> fileAndGtfsFile) {

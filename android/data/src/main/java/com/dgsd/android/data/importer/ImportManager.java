@@ -3,6 +3,7 @@ package com.dgsd.android.data.importer;
 import com.dgsd.android.data.DataSource;
 import com.dgsd.android.data.model.DbCalendarInfo;
 import com.dgsd.android.data.model.DbCalendarInfoEx;
+import com.dgsd.android.data.model.DbGraphEdge;
 import com.dgsd.android.data.model.DbRoute;
 import com.dgsd.android.data.model.DbStop;
 import com.dgsd.android.data.model.DbStopTime;
@@ -31,9 +32,10 @@ public class ImportManager {
         public static final String STOP_TIMES = "stop_times.csv";
         public static final String STOPS = "stops.csv";
         public static final String TRIPS = "trips.csv";
+        public static final String NETWORK_GRAPH = "network_graph.csv";
 
         public static final List<String> ALL = Arrays.asList(
-                CAL_INFO, CAL_INFO_EX, ROUTES, STOP_TIMES, STOPS, TRIPS
+                CAL_INFO, CAL_INFO_EX, ROUTES, STOP_TIMES, STOPS, TRIPS, NETWORK_GRAPH
         );
     }
 
@@ -95,10 +97,24 @@ public class ImportManager {
                 case ExpectedFiles.TRIPS:
                     importTrips(reader);
                     break;
+                case ExpectedFiles.NETWORK_GRAPH:
+                    importNetworkGraph(reader);
+                    break;
             }
         } finally {
             reader.close();
         }
+    }
+
+    private void importNetworkGraph(CSVReader reader) throws IOException {
+        final List<DbGraphEdge> models = new LinkedList<>();
+
+        String[] nextLine;
+        while ((nextLine = reader.readNext()) != null) {
+            models.add(new DbGraphEdge(nextLine));
+        }
+
+        dataSource.saveGraphEdges(models);
     }
 
     private void importTrips(CSVReader reader) throws IOException {

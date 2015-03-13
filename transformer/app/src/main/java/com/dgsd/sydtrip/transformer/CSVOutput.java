@@ -8,13 +8,16 @@ import com.dgsd.sydtrip.transformer.gtfs.model.target.StopTime;
 import com.dgsd.sydtrip.transformer.gtfs.model.target.Trip;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
@@ -50,11 +53,31 @@ public class CSVOutput {
         }
     }
 
-    public void persist(List<Trip> trips, List<Stop> stops) {
+    public void persist(List<Trip> trips, List<Stop> stops, Collection<GraphEdge> stopGraph) {
         persistStops(stops);
         persistTrips(trips);
         persistStopTimes();
+        persistGraph(stopGraph);
 //        persistDynamicText();
+    }
+
+    private void persistGraph(Collection<GraphEdge> edges) {
+        final CSVWriter writer = getWriter("network_graph.csv");
+        try {
+            for (GraphEdge edge : edges) {
+                writer.writeNext(new String[]{
+                        String.valueOf(edge.getFrom()),
+                        String.valueOf(edge.getTo()),
+                        String.valueOf(edge.getCost())
+                });
+            }
+        } finally {
+            try {
+                writer.close();
+            } catch (IOException ex) {
+                throw new DatabaseOperationException(ex);
+            }
+        }
     }
 
     private void persistStopTimes() {
@@ -177,7 +200,7 @@ public class CSVOutput {
     }
 
     private void persistCalendarInfo(CSVWriter writer, int tripId, CalendarInformation info) {
-        writer.writeNext(new String[] {
+        writer.writeNext(new String[]{
                 String.valueOf(tripId),
                 String.valueOf(info.getStartJulianDate()),
                 String.valueOf(info.getEndJulianDate()),

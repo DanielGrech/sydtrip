@@ -17,7 +17,7 @@ android {
 
         resValue "string", "app_name", "SydTrip"
 
-        buildConfigField "String", "UPDATE_URL_ENDPOINT", "\"http://10.0.0.109:8000\""
+        buildConfigField "String", "UPDATE_URL_ENDPOINT", "\"http://10.0.0.75:8000\""
     }
 
     signingConfigs {
