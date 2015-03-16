@@ -13,12 +13,12 @@ public class ShapeParser extends CsvParser<GtfsShape> {
     private static final String KEY_SHAPE_DIST_TRAVELLED = "shape_dist_traveled";
 
     @Override
-    protected GtfsShape create(List<String> fields, String... values) {
+    protected GtfsShape create(List<String> fields, List<String>  values) {
         final GtfsShape shape = new GtfsShape();
 
         for (int i = 0, size = fields.size(); i < size; i++) {
             final String key = fields.get(i);
-            final String value = values[i];
+            final String value = values.get(i);
 
             switch (key) {
                 case KEY_SHAPE_ID:

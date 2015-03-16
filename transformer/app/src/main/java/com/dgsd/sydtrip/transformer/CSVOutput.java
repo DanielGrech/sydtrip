@@ -7,6 +7,10 @@ import com.dgsd.sydtrip.transformer.gtfs.model.target.Stop;
 import com.dgsd.sydtrip.transformer.gtfs.model.target.StopTime;
 import com.dgsd.sydtrip.transformer.gtfs.model.target.Trip;
 
+import org.supercsv.io.CsvListWriter;
+import org.supercsv.prefs.CsvPreference;
+import org.supercsv.quote.QuoteMode;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -15,13 +19,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
-
-import au.com.bytecode.opencsv.CSVWriter;
 
 public class CSVOutput {
-
-    private final static Logger LOG = Logger.getLogger(Database.class.getName());
 
     private final String outputPath;
 
@@ -54,23 +53,27 @@ public class CSVOutput {
     }
 
     public void persist(List<Trip> trips, List<Stop> stops, Collection<GraphEdge> stopGraph) {
-        persistStops(stops);
-        persistTrips(trips);
+        try {
+            persistStops(stops);
+            persistTrips(trips);
 //        persistStopTimes();
-        persistGraph(stopGraph);
+            persistGraph(stopGraph);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
-    private void persistGraph(Collection<GraphEdge> edges) {
-        final CSVWriter writer = getWriter("network_graph.csv");
+    private void persistGraph(Collection<GraphEdge> edges) throws IOException {
+        final CsvListWriter writer = getWriter("network_graph.csv");
         try {
             for (GraphEdge edge : edges) {
-                writer.writeNext(new String[]{
-                        String.valueOf(edge.getFrom()),
-                        String.valueOf(edge.getTo()),
-                        String.valueOf(edge.getTripId()),
-                        String.valueOf(edge.getDepartureTime()),
-                        String.valueOf(edge.getArrivalTime())
-                });
+                writer.write(
+                        edge.getFrom(),
+                        edge.getTo(),
+                        edge.getTripId(),
+                        edge.getDepartureTime(),
+                        edge.getArrivalTime()
+                );
             }
         } finally {
             try {
@@ -81,8 +84,8 @@ public class CSVOutput {
         }
     }
 
-    private void persistStopTimes() {
-        final CSVWriter writer = getWriter("stop_times.csv");
+    private void persistStopTimes() throws IOException {
+        final CsvListWriter writer = getWriter("stop_times.csv");
         try {
             for (Map.Entry<List<StopTime>, Integer> entry : stopTimeCache.entrySet()) {
                 for (StopTime stopTime : entry.getKey()) {
@@ -98,20 +101,20 @@ public class CSVOutput {
         }
     }
 
-    private void persistStops(List<Stop> stops) {
-        final CSVWriter writer = getWriter("stops.csv");
+    private void persistStops(List<Stop> stops) throws IOException {
+        final CsvListWriter writer = getWriter("stops.csv");
         try {
             for (Stop stop : stops) {
-                writer.writeNext(new String[]{
-                        String.valueOf(stop.getId()),
+                writer.write(
+                        stop.getId(),
                         stop.getCode(),
                         stop.getName(),
-                        String.valueOf(stop.getLat()),
-                        String.valueOf(stop.getLng()),
-                        String.valueOf(stop.getType()),
-                        String.valueOf(stop.getParentStopId()),
+                        stop.getLat(),
+                        stop.getLng(),
+                        stop.getType(),
+                        stop.getParentStopId(),
                         stop.getPlatformCode()
-                });
+                );
             }
         } finally {
             try {
@@ -122,11 +125,11 @@ public class CSVOutput {
         }
     }
 
-    private void persistTrips(List<Trip> trips) {
-        final CSVWriter tripWriter = getWriter("trips.csv");
-        final CSVWriter routeWriter = getWriter("routes.csv");
-        final CSVWriter calInfoWriter = getWriter("cal_info.csv");
-        final CSVWriter calInfoExWriter = getWriter("cal_info_ex.csv");
+    private void persistTrips(List<Trip> trips) throws IOException {
+        final CsvListWriter tripWriter = getWriter("trips.csv");
+        final CsvListWriter routeWriter = getWriter("routes.csv");
+        final CsvListWriter calInfoWriter = getWriter("cal_info.csv");
+        final CsvListWriter calInfoExWriter = getWriter("cal_info_ex.csv");
 
         try {
             for (Trip trip : trips) {
@@ -140,16 +143,16 @@ public class CSVOutput {
                         true : calInfoCache.containsKey(calInfo);
                 final int calInfoId = getCalInfoId(calInfo);
 
-                tripWriter.writeNext(new String[]{
-                        String.valueOf(trip.getId()),
+                tripWriter.write(
+                        trip.getId(),
                         trip.getHeadSign(),
-                        String.valueOf(trip.getDirection()),
-                        String.valueOf(trip.getBlockId()),
-                        trip.isWheelchairAccessible() ? "1" : "0",
-                        String.valueOf(routeId),
-                        String.valueOf(getStopTimeListId(trip.getStops())),
-                        String.valueOf(calInfoId)
-                });
+                        trip.getDirection(),
+                        trip.getBlockId(),
+                        trip.isWheelchairAccessible() ? 1 : 0,
+                        routeId,
+                        getStopTimeListId(trip.getStops()),
+                        calInfoId
+                );
 
                 if (!routeHasBeenSavedAlready) {
                     persistRoute(routeWriter, new Route(routeId, route));
@@ -180,38 +183,38 @@ public class CSVOutput {
         }
     }
 
-    private void persistCalendarInfoEx(CSVWriter writer, int tripId, int julianDay, int exType) {
-        writer.writeNext(new String[]{
-                String.valueOf(tripId),
-                String.valueOf(julianDay),
-                String.valueOf(exType)
-        });
+    private void persistCalendarInfoEx(CsvListWriter writer, int tripId, int julianDay, int exType) throws IOException {
+        writer.write(
+                tripId,
+                julianDay,
+                exType
+        );
     }
 
-    private void persistCalendarInfo(CSVWriter writer, int tripId, CalendarInformation info) {
-        writer.writeNext(new String[]{
-                String.valueOf(tripId),
-                String.valueOf(info.getStartJulianDate()),
-                String.valueOf(info.getEndJulianDate()),
-                String.valueOf(info.getAvailabilityBitmask())
-        });
+    private void persistCalendarInfo(CsvListWriter writer, int tripId, CalendarInformation info) throws IOException {
+        writer.write(
+                tripId,
+                info.getStartJulianDate(),
+                info.getEndJulianDate(),
+                info.getAvailabilityBitmask()
+        );
     }
 
-    private void persistStopTime(CSVWriter writer, int tripId, StopTime stopTime) {
-        writer.writeNext(new String[]{
-                String.valueOf(tripId),
-                String.valueOf(stopTime.getStopId()),
-                String.valueOf(stopTime.getTime())
-        });
+    private void persistStopTime(CsvListWriter writer, int tripId, StopTime stopTime) throws IOException {
+        writer.write(
+                tripId,
+                stopTime.getStopId(),
+                stopTime.getTime()
+        );
     }
 
-    private void persistRoute(CSVWriter writer, Route route) {
-        writer.writeNext(new String[]{
-                String.valueOf(route.getId()),
+    private void persistRoute(CsvListWriter writer, Route route) throws IOException {
+        writer.write(
+                route.getId(),
                 route.getShortName(),
                 route.getLongName(),
-                String.valueOf(route.getColor())
-        });
+                route.getColor()
+        );
     }
 
     private int getStopTimeListId(List<StopTime> stops) {
@@ -259,9 +262,24 @@ public class CSVOutput {
         }
     }
 
-    private CSVWriter getWriter(String fileName) {
+    @SuppressWarnings("unused")
+    private CsvListWriter getWriter(String fileName) {
         try {
-            return new CSVWriter(new FileWriter(outputPath + fileName));
+            final QuoteMode qm = (csvColumn, context, preference) -> {
+                try {
+                    if (csvColumn != null) {
+                        float val = Float.valueOf(csvColumn);
+                    }
+                    return false;
+                } catch (Throwable t) {
+                    return true;
+                }
+            };
+
+            return new CsvListWriter(new FileWriter(outputPath + fileName),
+                    new CsvPreference.Builder(CsvPreference.STANDARD_PREFERENCE)
+                            .useQuoteMode(qm)
+                            .build());
         } catch (IOException e) {
             throw new DatabaseOperationException(e);
         }

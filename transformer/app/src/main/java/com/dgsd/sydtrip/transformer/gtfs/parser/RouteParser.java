@@ -16,12 +16,12 @@ public class RouteParser extends CsvParser<GtfsRoute> {
     private static final String KEY_ROUTE_TEXT_COLOR = "route_text_color";
 
     @Override
-    protected GtfsRoute create(List<String> fields, String... values) {
+    protected GtfsRoute create(List<String> fields, List<String> values) {
         final GtfsRoute route = new GtfsRoute();
 
         for (int i = 0, len = fields.size(); i < len; i++) {
             final String key = fields.get(i);
-            final String value = values[i];
+            final String value = values.get(i);
 
             switch (key) {
                 case KEY_ROUTE_ID:

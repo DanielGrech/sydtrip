@@ -17,12 +17,12 @@ public class StopTimeParser extends CsvParser<GtfsStopTime> {
     private static final String KEY_SHAPE_DIST_TRAVELLED = "shape_dist_traveled";
 
     @Override
-    protected GtfsStopTime create(List<String> fields, String... values) {
+    protected GtfsStopTime create(List<String> fields, List<String> values) {
         final GtfsStopTime stopTime = new GtfsStopTime();
 
         for (int i = 0, len = fields.size(); i < len; i++) {
-            final String key = fields.get(i).intern();
-            final String value = values[i].intern();
+            final String key = fields.get(i) == null ? null : fields.get(i).intern();
+            final String value = values.get(i) == null ? null : values.get(i).intern();
 
             switch (key) {
                 case KEY_TRIP_ID:

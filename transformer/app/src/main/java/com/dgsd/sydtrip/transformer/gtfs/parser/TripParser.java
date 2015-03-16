@@ -16,12 +16,12 @@ public class TripParser extends CsvParser<GtfsTrip> {
     private static final String KEY_WHEELCHAIR_ACCESSIBLE = "wheelchair_accessible";
 
     @Override
-    protected GtfsTrip create(List<String> fields, String... values) {
+    protected GtfsTrip create(List<String> fields, List<String> values) {
         final GtfsTrip trip = new GtfsTrip();
 
         for (int i = 0, len = fields.size(); i < len; i++) {
             final String key = fields.get(i);
-            final String value = values[i];
+            final String value = values.get(i);
 
             switch (key) {
                 case KEY_TRIP_ID:

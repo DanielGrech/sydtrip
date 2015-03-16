@@ -12,12 +12,12 @@ public class AgencyParser extends CsvParser<GtfsAgency> {
     private static final String KEY_AGENCY_PHONE = "agency_phone";
 
     @Override
-    protected GtfsAgency create(List<String> fields, String... values) {
+    protected GtfsAgency create(List<String> fields, List<String> values) {
         final GtfsAgency agency = new GtfsAgency();
 
         for (int i = 0, len = fields.size(); i < len; i++) {
             final String key = fields.get(i);
-            final String value = values[i];
+            final String value = values.get(i);
 
             switch (key) {
                 case KEY_AGENCY_ID:
