@@ -13,30 +13,19 @@ import com.dgsd.sydtrip.transformer.gtfs.model.staging.GtfsStagingRoute;
 import com.dgsd.sydtrip.transformer.gtfs.model.staging.GtfsStagingStop;
 import com.dgsd.sydtrip.transformer.gtfs.model.staging.GtfsStagingStopTime;
 import com.dgsd.sydtrip.transformer.gtfs.model.staging.GtfsStagingTrip;
-import com.dgsd.sydtrip.transformer.gtfs.model.target.CalendarInformation;
-import com.dgsd.sydtrip.transformer.gtfs.model.target.Route;
-import com.dgsd.sydtrip.transformer.gtfs.model.target.Stop;
-import com.dgsd.sydtrip.transformer.gtfs.model.target.StopTime;
 import com.dgsd.sydtrip.transformer.gtfs.model.target.Trip;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.logging.Logger;
 
 import static com.dgsd.sydtrip.transformer.gtfs.GtfsFile.ROUTES;
 import static com.dgsd.sydtrip.transformer.gtfs.GtfsFile.STOP_TIMES;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
 
 public class Application {
 
@@ -135,17 +124,5 @@ public class Application {
 
             // Add parent stops
         });
-    }
-
-    private GraphEdge edgeFromParents(GraphEdge edge, Map<Integer, Stop> stopIdToStop) {
-        final Stop from = stopIdToStop.get(edge.getFrom());
-        final Stop to = stopIdToStop.get(edge.getTo());
-
-        final int fromIdToUse = from == null || from.getParentStopId() <= 0 ?
-                edge.getFrom() : from.getParentStopId();
-        final int toIdToUse = to == null || to.getParentStopId() <= 0 ?
-                edge.getTo() : to.getParentStopId();
-
-        return new GraphEdge(fromIdToUse, toIdToUse, edge.getCost());
     }
 }

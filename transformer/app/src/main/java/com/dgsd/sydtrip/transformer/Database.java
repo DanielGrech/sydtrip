@@ -38,7 +38,7 @@ public class Database implements AutoCloseable {
     private static final String TRIP_INSERT_TEMPLATE
             = "INSERT OR REPLACE INTO trips VALUES(?, ?, ?, ?, ?, ?)";
     private static final String ROUTE_INSERT_TEMPLATE
-            = "INSERT OR REPLACE INTO routes VALUES(?, ?, ?, ?, ?)";
+            = "INSERT OR REPLACE INTO routes VALUES(?, ?, ?, ?)";
     private static final String STOP_TIME_INSERT_TEMPLATE
             = "INSERT OR REPLACE INTO stop_times VALUES(?, ?, ?)";
     private static final String DYNAMIC_TEXT_INSERT_TEMPLATE
@@ -182,7 +182,6 @@ public class Database implements AutoCloseable {
 
                                     int routeIdx = 1;
                                     setInt(routeStatement, routeIdx++, route.getId());
-                                    setInt(routeStatement, routeIdx++, route.getAgencyId());
                                     setInt(routeStatement, routeIdx++,
                                             getDynamicStringId(route.getShortName()));
                                     setInt(routeStatement, routeIdx++,

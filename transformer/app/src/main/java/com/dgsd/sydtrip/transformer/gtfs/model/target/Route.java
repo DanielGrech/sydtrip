@@ -17,8 +17,6 @@ public class Route {
 
     private final int id;
 
-    private final int agencyId;
-
     private final String shortName;
 
     private final String longName;
@@ -27,9 +25,16 @@ public class Route {
 
     private final int color;
 
+    public Route(int id, Route route) {
+        this.id = id;
+        this.shortName = route.shortName;
+        this.longName = route.longName;
+        this.routeType = route.routeType;
+        this.color = route.color;
+    }
+
     public Route(GtfsStagingRoute route) {
         id = route.getId();
-        agencyId = route.getAgencyId();
         shortName = StringUtils.isEmpty(route.getShortName()) ? "" : route.getShortName().trim();
         longName = StringUtils.isEmpty(route.getLongName()) ? "" : route.getLongName().trim();
         routeType = route.getRouteType();
@@ -38,10 +43,6 @@ public class Route {
 
     public int getId() {
         return id;
-    }
-
-    public int getAgencyId() {
-        return agencyId;
     }
 
     public String getShortName() {
@@ -67,7 +68,6 @@ public class Route {
 
         Route route = (Route) o;
 
-        if (agencyId != route.agencyId) return false;
         if (color != route.color) return false;
         if (routeType != route.routeType) return false;
         if (longName != null ? !longName.equals(route.longName) : route.longName != null)
@@ -80,11 +80,10 @@ public class Route {
 
     @Override
     public int hashCode() {
-        int result = agencyId;
+        int result = color;
         result = 31 * result + (shortName != null ? shortName.hashCode() : 0);
         result = 31 * result + (longName != null ? longName.hashCode() : 0);
         result = 31 * result + routeType;
-        result = 31 * result + color;
         return result;
     }
 
@@ -92,7 +91,6 @@ public class Route {
     public String toString() {
         return "Route{" +
                 "id=" + id +
-                ", agencyId=" + agencyId +
                 ", shortName='" + shortName + '\'' +
                 ", longName='" + longName + '\'' +
                 ", routeType=" + routeType +

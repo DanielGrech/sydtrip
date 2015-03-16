@@ -3,12 +3,21 @@ package com.dgsd.sydtrip.transformer;
 public class GraphEdge {
     private final int from;
     private final int to;
-    private final int cost;
+    private final int tripId;
+    private final int departureTime;
+    private final int arrivalTime;
 
-    public GraphEdge(int from, int to, int cost) {
+    public GraphEdge(
+            int from,
+            int to,
+            int tripId,
+            int departureTime,
+            int arrivalTime) {
         this.from = from;
         this.to = to;
-        this.cost = cost;
+        this.tripId = tripId;
+        this.departureTime = departureTime;
+        this.arrivalTime = arrivalTime;
     }
 
     public int getFrom() {
@@ -19,8 +28,16 @@ public class GraphEdge {
         return to;
     }
 
-    public int getCost() {
-        return cost;
+    public int getTripId() {
+        return tripId;
+    }
+
+    public int getDepartureTime() {
+        return departureTime;
+    }
+
+    public int getArrivalTime() {
+        return arrivalTime;
     }
 
     @Override
@@ -32,6 +49,7 @@ public class GraphEdge {
 
         if (from != graphEdge.from) return false;
         if (to != graphEdge.to) return false;
+        if (tripId != graphEdge.tripId) return false;
 
         return true;
     }
@@ -40,6 +58,7 @@ public class GraphEdge {
     public int hashCode() {
         int result = from;
         result = 31 * result + to;
+        result = 31 * result + tripId;
         return result;
     }
 }

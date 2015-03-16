@@ -7,9 +7,6 @@ import com.dgsd.sydtrip.transformer.gtfs.model.target.Stop;
 import com.dgsd.sydtrip.transformer.gtfs.model.target.StopTime;
 import com.dgsd.sydtrip.transformer.gtfs.model.target.Trip;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -17,7 +14,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
@@ -29,21 +25,25 @@ public class CSVOutput {
 
     private final String outputPath;
 
-    private final Map<String, Integer> dynamicTextCache;
-
     private final Map<List<StopTime>, Integer> stopTimeCache;
-
-    private final AtomicInteger dynamicTextGenerator;
+    private final Map<Route, Integer> routeCache;
+    private final Map<CalendarInformation, Integer> calInfoCache;
 
     private final AtomicInteger stopTimeGenerator;
+    private final AtomicInteger routeGenerator;
+    private final AtomicInteger calInfoGenerator;
 
     public CSVOutput(String outputPath) {
         this.outputPath = outputPath;
-        this.dynamicTextCache = new LinkedHashMap<>();
-        this.dynamicTextGenerator = new AtomicInteger(1);
 
         this.stopTimeCache = new LinkedHashMap<>();
         this.stopTimeGenerator = new AtomicInteger(1);
+
+        this.routeCache = new LinkedHashMap<>();
+        this.routeGenerator = new AtomicInteger(1);
+
+        this.calInfoCache = new LinkedHashMap<>();
+        this.calInfoGenerator = new AtomicInteger(1);
 
         final File dir = new File(outputPath);
         if (!dir.exists()) {
@@ -56,9 +56,8 @@ public class CSVOutput {
     public void persist(List<Trip> trips, List<Stop> stops, Collection<GraphEdge> stopGraph) {
         persistStops(stops);
         persistTrips(trips);
-        persistStopTimes();
+//        persistStopTimes();
         persistGraph(stopGraph);
-//        persistDynamicText();
     }
 
     private void persistGraph(Collection<GraphEdge> edges) {
@@ -68,7 +67,9 @@ public class CSVOutput {
                 writer.writeNext(new String[]{
                         String.valueOf(edge.getFrom()),
                         String.valueOf(edge.getTo()),
-                        String.valueOf(edge.getCost())
+                        String.valueOf(edge.getTripId()),
+                        String.valueOf(edge.getDepartureTime()),
+                        String.valueOf(edge.getArrivalTime())
                 });
             }
         } finally {
@@ -97,24 +98,6 @@ public class CSVOutput {
         }
     }
 
-    private void persistDynamicText() {
-        final CSVWriter writer = getWriter("text.csv");
-        try {
-            for (Map.Entry<String, Integer> entry : dynamicTextCache.entrySet()) {
-                writer.writeNext(new String[]{
-                        entry.getKey(),
-                        String.valueOf(entry.getValue())
-                });
-            }
-        } finally {
-            try {
-                writer.close();
-            } catch (IOException ex) {
-                throw new DatabaseOperationException(ex);
-            }
-        }
-    }
-
     private void persistStops(List<Stop> stops) {
         final CSVWriter writer = getWriter("stops.csv");
         try {
@@ -122,7 +105,6 @@ public class CSVOutput {
                 writer.writeNext(new String[]{
                         String.valueOf(stop.getId()),
                         stop.getCode(),
-//                        String.valueOf(getDynamicStringId(stop.getName())),
                         stop.getName(),
                         String.valueOf(stop.getLat()),
                         String.valueOf(stop.getLng()),
@@ -149,25 +131,32 @@ public class CSVOutput {
         try {
             for (Trip trip : trips) {
                 final Route route = trip.getRoute();
+                final boolean routeHasBeenSavedAlready = route == null ?
+                        true : routeCache.containsKey(route);
+                final int routeId = getRouteId(route);
+
+                final CalendarInformation calInfo = trip.getCalendarInformation();
+                final boolean calInfoHasBeenSavedAlready = calInfo == null ?
+                        true : calInfoCache.containsKey(calInfo);
+                final int calInfoId = getCalInfoId(calInfo);
 
                 tripWriter.writeNext(new String[]{
                         String.valueOf(trip.getId()),
-//                        String.valueOf(getDynamicStringId(trip.getHeadSign())),
                         trip.getHeadSign(),
                         String.valueOf(trip.getDirection()),
                         String.valueOf(trip.getBlockId()),
                         trip.isWheelchairAccessible() ? "1" : "0",
-                        String.valueOf(route == null ? 0 : route.getId()),
-                        String.valueOf(getStopTimeListId(trip.getStops()))
+                        String.valueOf(routeId),
+                        String.valueOf(getStopTimeListId(trip.getStops())),
+                        String.valueOf(calInfoId)
                 });
 
-                if (route != null) {
-                    persistRoute(routeWriter, route);
+                if (!routeHasBeenSavedAlready) {
+                    persistRoute(routeWriter, new Route(routeId, route));
                 }
 
-                final CalendarInformation calInfo = trip.getCalendarInformation();
-                if (calInfo != null) {
-                    persistCalendarInfo(calInfoWriter, trip.getId(), calInfo);
+                if (!calInfoHasBeenSavedAlready) {
+                    persistCalendarInfo(calInfoWriter, calInfoId, calInfo);
 
                     final Map<Integer, Integer> exceptions
                             = calInfo.getJulianDayToExceptionMap();
@@ -219,9 +208,6 @@ public class CSVOutput {
     private void persistRoute(CSVWriter writer, Route route) {
         writer.writeNext(new String[]{
                 String.valueOf(route.getId()),
-                String.valueOf(route.getAgencyId()),
-//                String.valueOf(getDynamicStringId(route.getShortName())),
-//                String.valueOf(getDynamicStringId(route.getLongName())),
                 route.getShortName(),
                 route.getLongName(),
                 String.valueOf(route.getColor())
@@ -243,20 +229,35 @@ public class CSVOutput {
         }
     }
 
-//    private int getDynamicStringId(String text) {
-//        if (StringUtils.isEmpty(text)) {
-//            return 0;
-//        }
-//
-//        final Integer id = dynamicTextCache.get(text);
-//        if (id == null) {
-//            final int retval = dynamicTextGenerator.incrementAndGet();
-//            dynamicTextCache.put(text, retval);
-//            return retval;
-//        } else {
-//            return id;
-//        }
-//    }
+    private int getRouteId(Route route) {
+        if (route == null) {
+            return -1;
+        }
+
+        final Integer id = routeCache.get(route);
+        if (id == null) {
+            final int retval = routeGenerator.incrementAndGet();
+            routeCache.put(route, retval);
+            return retval;
+        } else {
+            return id;
+        }
+    }
+
+    private int getCalInfoId(CalendarInformation calInfo) {
+        if (calInfo == null) {
+            return -1;
+        }
+
+        final Integer id = routeCache.get(calInfo);
+        if (id == null) {
+            final int retval = calInfoGenerator.incrementAndGet();
+            calInfoCache.put(calInfo, retval);
+            return retval;
+        } else {
+            return id;
+        }
+    }
 
     private CSVWriter getWriter(String fileName) {
         try {
