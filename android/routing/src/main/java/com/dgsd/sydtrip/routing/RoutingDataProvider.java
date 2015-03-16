@@ -5,6 +5,7 @@ import com.dgsd.sydtrip.model.Route;
 import com.dgsd.sydtrip.model.Stop;
 import com.dgsd.sydtrip.model.StopTime;
 import com.dgsd.sydtrip.model.Trip;
+import com.dgsd.sydtrip.routing.util.TransportNetworkGraph;
 
 import java.util.List;
 
@@ -15,6 +16,8 @@ public interface RoutingDataProvider {
     public int[] getStopIdsForTrip(int tripId);
 
     public int[] getStopIdsAtSameLocation(int stopId);
+
+    public TransportNetworkGraph getNetworkGraph();
 
     public Stop getStop(int stopId);
 

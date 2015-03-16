@@ -1,21 +1,19 @@
 package com.dgsd.sydtrip.routing;
 
 import com.dgsd.sydtrip.model.CalendarInfo;
-import com.dgsd.sydtrip.model.Route;
 import com.dgsd.sydtrip.model.Stop;
 import com.dgsd.sydtrip.model.StopPair;
 import com.dgsd.sydtrip.model.StopTime;
-import com.dgsd.sydtrip.model.Trip;
-import com.dgsd.sydtrip.routing.model.RoutingItinery;
 import com.dgsd.sydtrip.routing.model.RoutingResult;
+import com.dgsd.sydtrip.routing.util.AStarSearch;
+import com.dgsd.sydtrip.routing.util.LocationUtils;
 
-import java.util.Arrays;
 import java.util.List;
 
+import gnu.trove.TIntArrayList;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntObjectHashMap;
 import jodd.datetime.JDateTime;
-import jodd.datetime.JulianDateStamp;
 import rx.Observable;
 import rx.functions.Func0;
 
@@ -38,62 +36,101 @@ public class RoutingEngine {
                 final int[] stopIdsForOrig = dataProvider.getStopIdsAtSameLocation(orig.getId());
                 final int[] stopIdsForDest = dataProvider.getStopIdsAtSameLocation(dest.getId());
 
-                final int[] tripsWhichStopAtOrig = getTripsForStopIds(stopIdsForOrig);
-                final int[] tripsWhichStopAtDest = getTripsForStopIds(stopIdsForDest);
+                final Stop origParentStop = getParentStopOrDefault(stopIdsForOrig, orig.getId());
+                final Stop destParentStop = getParentStopOrDefault(stopIdsForDest, dest.getId());
 
-                final int[] intersection = intersect(tripsWhichStopAtOrig, tripsWhichStopAtDest);
+                final TIntArrayList tripsWhichStopAtOrig = getTripsForStopIds(stopIdsForOrig);
+                final TIntArrayList tripsWhichStopAtDest = getTripsForStopIds(stopIdsForDest);
 
-                final int julianDay = constraints.getJulianDay();
-                final int dayOfWeek = new JDateTime(new JulianDateStamp(julianDay, 0)).getDayOfWeek();
-
-                final RoutingResult rr = new RoutingResult(originAndDestination);
-
-                if (intersection.length > 0) {
-                    for (int tripId : intersection) {
-                        final CalendarInfo calInfo = dataProvider.getCalendarInfo(tripId, julianDay);
-                        if (calendarInfoIsValid(calInfo, dayOfWeek)) {
-                            final List<StopTime> times = dataProvider.getStopsAndTimesForTrip(tripId);
-                            if (tripIsInCorrectDirection(times, stopIdsForOrig, stopIdsForDest)) {
-                                final Trip trip = dataProvider.getTrip(tripId);
-                                final Route route = dataProvider.getRoute(trip.getRouteId());
-                                final RoutingItinery itinery
-                                        = RoutingItinery.createFromSingleBlock(trip, route, times);
-
-                                final int startId = getFirstStopIdIn(times, stopIdsForOrig);
-                                final int endId = getFirstStopIdIn(times, stopIdsForDest);
-
-                                itinery.setOriginStation(dataProvider.getStop(startId));
-                                itinery.setDestinationStation(dataProvider.getStop(endId));
-
-                                rr.add(itinery);
+                dataProvider.getNetworkGraph().findBestPath(
+                        origParentStop,
+                        destParentStop,
+                        new AStarSearch.Heuristic() {
+                            @Override
+                            public int score(Stop start, Stop goal, Stop toAssess) {
+                                return LocationUtils.distanceBetween(goal, toAssess);
                             }
                         }
-                    }
-                } else {
-                    final TIntObjectHashMap origStopIdsByTrip
-                            = combine(tripsWhichStopAtOrig, getStopIdsForTrips(tripsWhichStopAtOrig));
+                );
 
-                    final TIntObjectHashMap destStopIdsByTrip
-                            = combine(tripsWhichStopAtDest, getStopIdsForTrips(tripsWhichStopAtDest));
-                }
+                return Observable.empty();
 
-                rr.sortItineries();
-
-                return Observable.just(rr);
+//                final int[] tripsWhichStopAtOrig = getTripsForStopIds(stopIdsForOrig);
+//                final int[] tripsWhichStopAtDest = getTripsForStopIds(stopIdsForDest);
+//
+//                final int[] intersection = intersect(tripsWhichStopAtOrig, tripsWhichStopAtDest);
+//
+//                final int julianDay = constraints.getJulianDay();
+//                final int dayOfWeek = new JDateTime(new JulianDateStamp(julianDay, 0)).getDayOfWeek();
+//
+//                final RoutingResult rr = new RoutingResult(originAndDestination);
+//
+//                if (intersection.length > 0) {
+//                    for (int tripId : intersection) {
+//                        final CalendarInfo calInfo = dataProvider.getCalendarInfo(tripId, julianDay);
+//                        if (calendarInfoIsValid(calInfo, dayOfWeek)) {
+//                            final List<StopTime> times = dataProvider.getStopsAndTimesForTrip(tripId);
+//                            if (tripIsInCorrectDirection(times, stopIdsForOrig, stopIdsForDest)) {
+//                                final Trip trip = dataProvider.getTrip(tripId);
+//                                final Route route = dataProvider.getRoute(trip.getRouteId());
+//                                final RoutingItinery itinery
+//                                        = RoutingItinery.createFromSingleBlock(trip, route, times);
+//
+//                                final int startId = getFirstStopIdIn(times, stopIdsForOrig);
+//                                final int endId = getFirstStopIdIn(times, stopIdsForDest);
+//
+//                                itinery.setOriginStation(dataProvider.getStop(startId));
+//                                itinery.setDestinationStation(dataProvider.getStop(endId));
+//
+//                                rr.add(itinery);
+//                            }
+//                        }
+//                    }
+//                } else {
+//                    final TIntObjectHashMap origStopIdsByTrip
+//                            = combine(tripsWhichStopAtOrig, getStopIdsForTrips(tripsWhichStopAtOrig));
+//
+//                    final TIntObjectHashMap destStopIdsByTrip
+//                            = combine(tripsWhichStopAtDest, getStopIdsForTrips(tripsWhichStopAtDest));
+//                }
+//
+//                rr.sortItineries();
+//
+//                return Observable.just(rr);
             }
         });
+    }
+
+    private Stop getParentStopOrDefault(int[] potentialStops, int defaultStopId) {
+        Stop retval = null;
+        for (int stopId : potentialStops) {
+            final Stop stop = dataProvider.getStop(stopId);
+            if (stop.getParentId() == 0) {
+                retval = stop;
+            } else if (retval == null || defaultStopId == stop.getId()) {
+                retval = stop;
+            }
+        }
+        return retval;
     }
 
     private boolean calendarInfoIsValid(CalendarInfo info, int dayOfWeek) {
         if (info != null) {
             switch (dayOfWeek) {
-                case JDateTime.MONDAY: return info.monday();
-                case JDateTime.TUESDAY: return info.tuesday();
-                case JDateTime.WEDNESDAY: return info.wednesday();
-                case JDateTime.THURSDAY: return info.thursday();
-                case JDateTime.FRIDAY: return info.friday();
-                case JDateTime.SATURDAY: return info.saturday();
-                case JDateTime.SUNDAY: return info.sunday();
+                case JDateTime.MONDAY:
+                    return info.monday();
+                case JDateTime.TUESDAY:
+                    return info.tuesday();
+                case JDateTime.WEDNESDAY:
+                    return info.wednesday();
+                case JDateTime.THURSDAY:
+                    return info.thursday();
+                case JDateTime.FRIDAY:
+                    return info.friday();
+                case JDateTime.SATURDAY:
+                    return info.saturday();
+                case JDateTime.SUNDAY:
+                    return info.sunday();
             }
         }
 
@@ -160,21 +197,13 @@ public class RoutingEngine {
         return retval;
     }
 
-    private int[] getTripsForStopIds(int[] stopIds) {
-        int[] retval = null;
+    private TIntArrayList getTripsForStopIds(int[] stopIds) {
+        TIntArrayList retval = new TIntArrayList();
         for (int i = 0, len = stopIds.length; i < len; i++) {
-            int[] tripIds = this.dataProvider.getTripsForStopId(stopIds[i]);
-            if (retval == null) {
-                retval = tripIds;
-            } else {
-                final int origLen = retval.length;
-
-                retval = Arrays.copyOf(retval, origLen + tripIds.length);
-                System.arraycopy(tripIds, 0, retval, origLen, tripIds.length);
-            }
+            retval.add(this.dataProvider.getTripsForStopId(stopIds[i]));
         }
 
-        return retval == null ? new int[0] : retval;
+        return retval;
     }
 
     private TIntObjectHashMap combine(int[] tripIds, int[][] stopIdsByTrip) {
@@ -190,13 +219,13 @@ public class RoutingEngine {
         return retval;
     }
 
-    private int[] intersect(int[] lhs, int[] rhs) {
+    private TIntArrayList intersect(int[] lhs, int[] rhs) {
         final TIntHashSet set = new TIntHashSet();
 
         set.addAll(lhs);
         set.retainAll(rhs);
 
-        return set.toArray();
+        return new TIntArrayList(set.toArray());
     }
 
 }

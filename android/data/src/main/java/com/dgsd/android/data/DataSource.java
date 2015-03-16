@@ -31,8 +31,6 @@ public class DataSource {
 
     private final DatabaseBackend db;
 
-    private Observable<List<GraphEdge>> networkObservable;
-
     public DataSource(DatabaseBackend dbBackend) {
         this.db = dbBackend;
     }
@@ -65,35 +63,31 @@ public class DataSource {
     }
 
     public Observable<List<GraphEdge>> getNetwork() {
-        if (networkObservable == null) {
-            networkObservable = Observable.defer(new Func0<Observable<List<DbGraphEdge>>>() {
-                @Override
-                public Observable<List<DbGraphEdge>> call() {
-                    return Observable.just(db.getNetwork());
-                }
-            }).flatMap(new Func1<List<DbGraphEdge>, Observable<DbGraphEdge>>() {
-                @Override
-                public Observable<DbGraphEdge> call(List<DbGraphEdge> dbGraphEdges) {
-                    return Observable.from(dbGraphEdges);
-                }
-            }).flatMap(new Func1<DbGraphEdge, Observable<GraphEdge>>() {
-                @Override
-                public Observable<GraphEdge> call(final DbGraphEdge dbGraphEdge) {
-                    return Observable.combineLatest(
-                            getStop(dbGraphEdge.getFromStop()),
-                            getStop(dbGraphEdge.getToStop()),
-                            new Func2<Stop, Stop, GraphEdge>() {
-                                @Override
-                                public GraphEdge call(Stop from, Stop to) {
-                                    return new GraphEdge(from, to, dbGraphEdge.getCost());
-                                }
+        return Observable.defer(new Func0<Observable<List<DbGraphEdge>>>() {
+            @Override
+            public Observable<List<DbGraphEdge>> call() {
+                return Observable.just(db.getNetwork());
+            }
+        }).flatMap(new Func1<List<DbGraphEdge>, Observable<DbGraphEdge>>() {
+            @Override
+            public Observable<DbGraphEdge> call(List<DbGraphEdge> dbGraphEdges) {
+                return Observable.from(dbGraphEdges);
+            }
+        }).flatMap(new Func1<DbGraphEdge, Observable<GraphEdge>>() {
+            @Override
+            public Observable<GraphEdge> call(final DbGraphEdge dbGraphEdge) {
+                return Observable.combineLatest(
+                        getStop(dbGraphEdge.getFromStop()),
+                        getStop(dbGraphEdge.getToStop()),
+                        new Func2<Stop, Stop, GraphEdge>() {
+                            @Override
+                            public GraphEdge call(Stop from, Stop to) {
+                                return new GraphEdge(from, to, dbGraphEdge.getCost());
                             }
-                    );
-                }
-            }).toList().cache();
-        }
-
-        return networkObservable;
+                        }
+                );
+            }
+        }).toList();
     }
 
     public Observable<Stop> getStop(final int stopId) {

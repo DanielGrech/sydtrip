@@ -2,21 +2,26 @@ package com.dgsd.android.sydtrip;
 
 import com.dgsd.android.data.DataSource;
 import com.dgsd.sydtrip.model.CalendarInfo;
+import com.dgsd.sydtrip.model.GraphEdge;
 import com.dgsd.sydtrip.model.Route;
 import com.dgsd.sydtrip.model.Stop;
 import com.dgsd.sydtrip.model.StopTime;
 import com.dgsd.sydtrip.model.Trip;
 import com.dgsd.sydtrip.routing.RoutingDataProvider;
+import com.dgsd.sydtrip.routing.util.TransportNetworkGraph;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import rx.functions.Func1;
 import timber.log.Timber;
 
 public class DataSourceRoutingDataProvider implements RoutingDataProvider {
 
     private final DataSource dataSource;
+
+    private TransportNetworkGraph networkGraph;
 
     public DataSourceRoutingDataProvider(DataSource source) {
         this.dataSource = source;
@@ -35,6 +40,21 @@ public class DataSourceRoutingDataProvider implements RoutingDataProvider {
     @Override
     public int[] getStopIdsAtSameLocation(int stopId) {
         return this.dataSource.getStopIdsAtSameLocation(stopId).toBlocking().single();
+    }
+
+    @Override
+    public TransportNetworkGraph getNetworkGraph() {
+        if (networkGraph == null) {
+            networkGraph = this.dataSource.getNetwork()
+                    .map(new Func1<List<GraphEdge>, TransportNetworkGraph>() {
+                        @Override
+                        public TransportNetworkGraph call(List<GraphEdge> graphEdges) {
+                            return new TransportNetworkGraph(graphEdges);
+                        }
+                    })
+                    .toBlocking().single();
+        }
+        return networkGraph;
     }
 
     @Override

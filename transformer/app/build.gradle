@@ -1,7 +1,7 @@
 
 apply plugin:'application'
 
-mainClassName = "com.dgsd.sydtrip.transformer.Application"
+mainClassName = "com.dgsd.sydtrip.transformer.Main"
 applicationDefaultJvmArgs = [
         '-Xmx5148m'
 ]

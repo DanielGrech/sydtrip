@@ -4,13 +4,6 @@ import android.os.Bundle;
 import android.view.Menu;
 
 import com.dgsd.android.sydtrip.R;
-import com.dgsd.sydtrip.model.GraphEdge;
-import com.dgsd.sydtrip.model.Stop;
-import com.dgsd.sydtrip.routing.util.TransportNetworkGraph;
-
-import java.util.List;
-
-import rx.functions.Action1;
 
 public class FavouritesActivity extends BaseActivity {
 
@@ -19,23 +12,23 @@ public class FavouritesActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.act_favourites);
 
-        getApp().getDataSource()
-                .getNetwork()
-                .subscribe(new Action1<List<GraphEdge>>() {
-                    @Override
-                    public void call(List<GraphEdge> graphEdges) {
-                        final Stop from = getApp().getDataSource().getStop(4352).toBlocking().single();
-                        final Stop to = getApp().getDataSource().getStop(2026).toBlocking().single();
+//        getApp().getDataSource()
+//                .getNetwork()
+//                .subscribe(new Action1<List<GraphEdge>>() {
+//                    @Override
+//                    public void call(List<GraphEdge> graphEdges) {
+//                        final Stop from = getApp().getDataSource().getStop(4352).toBlocking().single();
+//                        final Stop to = getApp().getDataSource().getStop(2026).toBlocking().single();
 //                        final Stop to = getApp().getDataSource().getStop(4008).toBlocking().single();
-
-                        new TransportNetworkGraph(graphEdges).findBestPath(from, to);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
-                });
+//
+//                        new TransportNetworkGraph(graphEdges).findBestPath(from, to);
+//                    }
+//                }, new Action1<Throwable>() {
+//                    @Override
+//                    public void call(Throwable throwable) {
+//                        throwable.printStackTrace();
+//                    }
+//                });
 
 //        final Observable<List<String>> observable = getApp().getUpdateManager()
 //                .update()

@@ -51,7 +51,7 @@ public class FavouritesFragment extends PresentableFragment<FavouritesPresenter>
     @Override
     public void addNewFavourite() {
 //        final Intent intent = new Intent(getContext(), AddFavouriteActivity.class);
-        final Intent intent = RoutingResultListActivity.createIntent(getActivity(), 1147, 7080);
+        final Intent intent = RoutingResultListActivity.createIntent(getActivity(), 4352, 4008);
         UiUtils.startActivity(fab, intent);
     }
 

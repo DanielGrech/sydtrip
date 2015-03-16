@@ -22,11 +22,32 @@ import com.dgsd.sydtrip.transformer.gtfs.model.staging.GtfsStagingTrip;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.logging.Logger;
+
+import static java.util.stream.Collectors.toList;
 
 public class StagingConverter {
 
+    private final static Logger LOG = Logger.getLogger(StagingConverter.class.getName());
+
     private static final HashMap<Class, Constructor> constructorCache
             = new HashMap<>();
+
+    public static List<? extends BaseStagingModel> processGtfsFile(GtfsFile gtfsFile,
+                                                             List<? extends BaseGtfsModel> models) {
+        try {
+            LOG.info(gtfsFile + " - staging transform ");
+            return models.parallelStream()
+                    .map(StagingConverter::convert)
+                    .filter(Objects::nonNull)
+                    .map(object -> (BaseStagingModel) object)
+                    .collect(toList());
+        } finally {
+            LOG.info(gtfsFile + " - finished staging transform ");
+        }
+    }
 
     public static <T extends BaseGtfsModel, S extends BaseStagingModel<T>> S convert(T model) {
         final Class<T> cls = (Class<T>) model.getClass();

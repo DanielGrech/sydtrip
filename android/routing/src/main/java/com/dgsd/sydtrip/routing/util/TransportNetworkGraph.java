@@ -50,8 +50,8 @@ public class TransportNetworkGraph {
         from.edges.add(new Edge(to, cost));
     }
 
-    public List<GraphEdge> findBestPath(Stop from, Stop to) {
-        System.out.println("BEST PATH: " + new AStarSearch(this, from, to).search().toString());
+    public List<GraphEdge> findBestPath(Stop from, Stop to, AStarSearch.Heuristic heuristic) {
+        System.out.println("BEST PATH: " + new AStarSearch(this, from, to, heuristic).search().toString());
         return null;
     }
 
