@@ -82,10 +82,11 @@ public class RoutingTest {
 
     @Test
     public void testRoutingDirect() {
-        final int startNode = 485; // 485 = Quakers Hill
-        final int endNode = 6945; // 6945 = Marayong
+        final int startNode = 485; // Quakers Hill
+//        final int endNode = 6945; // Marayong
+        final int endNode = 2978; // Blacktown
         List<Node> path = graph.findPath(startNode, endNode, stopMap);
-        System.out.println("PATH: " + path);
+        System.out.println("==========");
     }
 
     @Test
@@ -97,7 +98,7 @@ public class RoutingTest {
 
 
         List<Node> path = graph.findPath(startNode, endNode, stopMap);
-        System.out.println("PATH: " + path);
+        System.out.println("==========");
     }
 
 

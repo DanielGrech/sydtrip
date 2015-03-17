@@ -1,7 +1,10 @@
 package com.dgsd.sydtrip.transformer.routing.graph;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 class Node {
     final int id;
@@ -14,14 +17,14 @@ class Node {
         this.outgoingEdges = new HashSet<>();
     }
 
-    public Set<Edge> getOutgoingEdgesDepartingAfter(int secondsInDay) {
-        final Set<Edge> retval = new HashSet<>();
+    public List<Edge> getOutgoingEdgesDepartingAfter(int secondsInDay) {
+        final Set<Edge> retval = new TreeSet<>(Edge.SORT_BY_EARLIEST_DEPARTURE);
         for (Edge e : outgoingEdges) {
             if (e.departureTime > secondsInDay) {
                 retval.add(e);
             }
         }
-        return retval;
+        return new LinkedList<>(retval);
     }
 
     @Override
