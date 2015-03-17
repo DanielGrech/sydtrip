@@ -78,7 +78,7 @@ public class Stop {
 
     @Override
     public String toString() {
-        return "GtfsStagingStop{" +
+        return "Stop{" +
                 "id=" + id +
                 ", code='" + code + '\'' +
                 ", name='" + name + '\'' +

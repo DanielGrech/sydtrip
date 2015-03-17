@@ -8,19 +8,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BaseStagingModelTest {
 
     @Test
-    public void should_return_max_value_for_null_input_parse_date_to_julian_day() {
-        assertThat(parseDateToJulianDay(null)).isEqualTo(Integer.MAX_VALUE);
+    public void should_return_negative_value_for_null_input_parse_date_to_julian_day() {
+        assertThat(parseDateToJulianDay(null)).isNegative();
     }
 
     @Test
-    public void should_return_max_value_for_empty_input_parse_date_to_julian_day() {
-        assertThat(parseDateToJulianDay("")).isEqualTo(Integer.MAX_VALUE);
+    public void should_return_negative_value_for_empty_input_parse_date_to_julian_day() {
+        assertThat(parseDateToJulianDay("")).isNegative();
     }
 
     @Test
-    public void should_return_max_value_for_invalid_input_parse_date_to_julian_day() {
-        assertThat(parseDateToJulianDay("this is rubbish")).isEqualTo(Integer.MAX_VALUE);
-        assertThat(parseDateToJulianDay("15-09-2014")).isEqualTo(Integer.MAX_VALUE);
+    public void should_return_negative_value_for_invalid_input_parse_date_to_julian_day() {
+        assertThat(parseDateToJulianDay("this is rubbish")).isNegative();
+        assertThat(parseDateToJulianDay("15-09-2014")).isNegative();
     }
 
     @Test
