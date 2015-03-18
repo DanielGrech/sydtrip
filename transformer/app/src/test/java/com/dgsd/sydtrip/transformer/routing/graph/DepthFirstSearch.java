@@ -5,11 +5,14 @@ import com.dgsd.sydtrip.transformer.gtfs.model.target.Stop;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 public class DepthFirstSearch {
 
@@ -46,7 +49,7 @@ public class DepthFirstSearch {
 
                 final List<Edge> possibleEdges
                         = edge.target.getOutgoingEdgesDepartingAfter(edge.arrivalTime);
-                Collections.sort(possibleEdges, new Edge.SortByTrip(edge.tripId).reversed());
+                Collections.sort(possibleEdges, new Edge.SortByTrip(edge.tripId));
 
                 for (Edge e : possibleEdges) {
                     connectionPath.push(e);
@@ -58,33 +61,38 @@ public class DepthFirstSearch {
             }
         } while ((!connectionPath.isEmpty()));
 
-        Optional<Edge> first = parentMap.keySet()
+        final List<Edge> goals = parentMap.keySet()
                 .stream()
                 .filter(e -> e.target.equals(this.goal))
-                .findFirst();
+                .collect(toList());
 
-        if (first.isPresent()) {
-            Edge edge = first.get();
-            while (edge != null) {
-                if (edge.isStartingEdge) {
-                    System.out.println(String.format("Board at %s at %s aboard trip %s",
-                            stopMap.get(edge.origin.id).getName(), edge.departureTime, edge.tripId));
-                } else if (edge.target.equals(this.goal)) {
-                    System.out.println(String.format("Alight at %s at %s aboard trip %s",
-                            stopMap.get(edge.target.id).getName(), edge.arrivalTime, edge.tripId));
-                } else {
-                    System.out.println(String.format("%s [%s] -> %s [%s] on trip %s",
-                            stopMap.get(edge.origin.id).getName(),
-                            edge.departureTime,
-                            stopMap.get(edge.target.id).getName(),
-                            edge.arrivalTime,
-                            edge.tripId));
+        if (goals.isEmpty()) {
+            System.out.println("NO PATH FOUND!");
+        } else {
+            final List<List<Edge>> results = new LinkedList<>();
+            for (Edge edge : goals) {
+                final List<Edge> edges = new LinkedList<>();
+                while (edge != null) {
+                    edges.add(edge);
+                    edge = parentMap.get(edge);
                 }
 
-                edge = parentMap.get(edge);
+                Collections.reverse(edges);
+                results.add(edges);
             }
-        } else {
-            System.out.println("NO PATH FOUND!");
+
+            List<List<Edge>> singleTripResults = results.stream()
+                    .filter(list -> list.stream()
+                                    .filter(e -> !e.isStartingEdge)
+                                    .mapToInt(e -> e.tripId)
+                                    .distinct()
+                                    .count() == 1
+                    ).collect(Collectors.toList());
+
+            for (List<Edge> result : singleTripResults) {
+                result.forEach(System.out::println);
+                System.out.println("\n\n");
+            }
         }
 
         return null;

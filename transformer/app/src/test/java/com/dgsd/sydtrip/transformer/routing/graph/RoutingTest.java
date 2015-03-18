@@ -89,17 +89,17 @@ public class RoutingTest {
         System.out.println("==========");
     }
 
-    @Test
-    public void testRoutingOneStopover() {
-        final int startNode = 485; // Quakers Hill
-//        final int endNode = 3901; // Doonside
-        final int endNode = 2843; // Penrith
-//        final int endNode = 2562; // Epping
-
-
-        List<Node> path = graph.findPath(startNode, endNode, stopMap);
-        System.out.println("==========");
-    }
+//    @Test
+//    public void testRoutingOneStopover() {
+//        final int startNode = 485; // Quakers Hill
+////        final int endNode = 3901; // Doonside
+//        final int endNode = 2843; // Penrith
+////        final int endNode = 2562; // Epping
+//
+//
+//        List<Node> path = graph.findPath(startNode, endNode, stopMap);
+//        System.out.println("==========");
+//    }
 
 
 }

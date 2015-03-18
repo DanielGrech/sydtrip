@@ -4,7 +4,7 @@ import com.dgsd.sydtrip.transformer.GraphEdge;
 
 import java.util.Comparator;
 
-class Edge {
+public class Edge {
     final int tripId;
     final int departureTime;
     final int arrivalTime;
@@ -32,6 +32,16 @@ class Edge {
         this.cost = this.arrivalTime - this.departureTime;
 
         this.isStartingEdge = origin.equals(target) && tripId < 0;
+    }
+
+    @Override
+    public String toString() {
+        if (isStartingEdge) {
+            return String.format("-> (%s)[%s]", origin.id, departureTime);
+        } else {
+            return String.format("(%s)[%s] -> (%s)[%s] [trip = %s]",
+                    origin.id, departureTime, target.id, arrivalTime, tripId);
+        }
     }
 
     @Override
