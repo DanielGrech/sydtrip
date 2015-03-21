@@ -33,7 +33,7 @@ public class DepthFirstSearch {
         final int startTime = 64800;
 
         final Stack<Edge> connectionPath = new Stack<>();
-        final Map<Edge, Edge> parentMap = new HashMap<>();
+        final Map<Edge, Edge> pathMap = new HashMap<>();
         final Set<Node> discovered = new HashSet<>();
 
         connectionPath.push(new Edge(this.start, startTime));
@@ -55,13 +55,13 @@ public class DepthFirstSearch {
                     connectionPath.push(e);
 
                     if (!discovered.contains(e.target)) {
-                        parentMap.put(e, edge);
+                        pathMap.put(e, edge);
                     }
                 }
             }
         } while ((!connectionPath.isEmpty()));
 
-        final List<Edge> goals = parentMap.keySet()
+        final List<Edge> goals = pathMap.keySet()
                 .stream()
                 .filter(e -> e.target.equals(this.goal))
                 .collect(toList());
@@ -74,7 +74,7 @@ public class DepthFirstSearch {
                 final List<Edge> edges = new LinkedList<>();
                 while (edge != null) {
                     edges.add(edge);
-                    edge = parentMap.get(edge);
+                    edge = pathMap.get(edge);
                 }
 
                 Collections.reverse(edges);

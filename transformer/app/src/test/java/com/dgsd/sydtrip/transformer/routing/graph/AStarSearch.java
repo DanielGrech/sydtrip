@@ -1,7 +1,6 @@
 package com.dgsd.sydtrip.transformer.routing.graph;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,7 +32,7 @@ class AStarSearch {
         this.heuristic = heuristic;
     }
 
-    public List<Node> search() {
+    public List<List<Node>> search() {
         final HashSet<Node> closedSet = new HashSet();
         final Queue<Node> openSet = new PriorityQueue(11, new Comparator<Node>() {
             @Override
@@ -51,11 +50,14 @@ class AStarSearch {
         final HashMap<Node, Score> scores = new HashMap<>();
         scores.put(this.start, new Score(0, heuristic.score(start, goal, start)));
 
+        List<List<Node>> retval = new LinkedList<>();
+
         while (!openSet.isEmpty()) {
             final Node current = openSet.poll();
 
             if (current.equals(goal)) {
-                return reconstructPath(cameFrom, current);
+                retval.add(reconstructPath(cameFrom, current));
+                cameFrom.clear();
             }
 
             closedSet.add(current);
@@ -79,7 +81,7 @@ class AStarSearch {
             }
         }
 
-        return Collections.emptyList();
+        return retval;
     }
 
     private List<Node> reconstructPath(HashMap<Node, Node> cameFrom, Node current) {

@@ -31,11 +31,12 @@ public class TransportNetworkGraph {
         toNode.incomingEdges.add(edge);
     }
 
-    public List<Node> findPath(int startNode, int endNode, Map<Integer, Stop> stopMap) {
+    public List<List<Node>> findPath(int startNode, int endNode, Map<Integer, Stop> stopMap) {
         final Node start = nodes.get(startNode);
         final Node end = nodes.get(endNode);
 
-        return new DepthFirstSearch(this, start, end, stopMap).search();
+//        return new DepthFirstSearch(this, start, end, stopMap).search();
+        return new DepthFirstSearch2(this, start, end, stopMap).search();
     }
 
     public Node addNode(int nodeId) {

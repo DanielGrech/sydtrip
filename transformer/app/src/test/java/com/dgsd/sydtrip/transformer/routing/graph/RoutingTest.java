@@ -85,10 +85,16 @@ public class RoutingTest {
         final int startNode = 485; // Quakers Hill
 //        final int endNode = 6945; // Marayong
         final int endNode = 2978; // Blacktown
-        List<Node> path = graph.findPath(startNode, endNode, stopMap);
-        System.out.println("==========");
+        graph.findPath(startNode, endNode, stopMap).stream().forEach(path -> {
+            path.stream()
+                    .map(n -> n.id)
+                    .map(id -> stopMap.get(id).getName() + "(" + id + ")")
+                    .forEach(System.out::println);
+            System.out.println("==========");
+        });
     }
 
+//    @Ignore
 //    @Test
 //    public void testRoutingOneStopover() {
 //        final int startNode = 485; // Quakers Hill

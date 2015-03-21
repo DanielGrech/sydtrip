@@ -11,10 +11,20 @@ public class Node {
     final Set<Edge> incomingEdges;
     final Set<Edge> outgoingEdges;
 
+    Node parent;
+    
     Node(int id) {
         this.id = id;
         this.incomingEdges = new HashSet<>();
         this.outgoingEdges = new HashSet<>();
+    }
+
+    public Set<Node> getOutgoingNodes() {
+        final Set<Node> retval = new HashSet<>();
+        for (Edge edge : outgoingEdges) {
+            retval.add(edge.target);
+        }
+        return retval;
     }
 
     public List<Edge> getOutgoingEdgesDepartingAfter(int secondsInDay) {
