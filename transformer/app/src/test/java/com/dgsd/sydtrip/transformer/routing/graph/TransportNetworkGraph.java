@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class TransportNetworkGraph {
 
-    private final Map<Integer, Node> nodes;
+    final Map<Integer, Node> nodes;
 
     public TransportNetworkGraph() {
         this.nodes = new HashMap<>();
@@ -36,7 +36,7 @@ public class TransportNetworkGraph {
         final Node end = nodes.get(endNode);
 
 //        return new DepthFirstSearch(this, start, end, stopMap).search();
-        return new DepthFirstSearch2(this, start, end, stopMap).search();
+        return new Dijkstra(this, start, end, stopMap).search();
     }
 
     public Node addNode(int nodeId) {

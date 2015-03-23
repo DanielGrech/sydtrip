@@ -6,10 +6,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class Node {
+public class Node implements Comparable<Node> {
     final int id;
     final Set<Edge> incomingEdges;
     final Set<Edge> outgoingEdges;
+
+    double minDistance = Double.POSITIVE_INFINITY;
 
     Node parent;
     
@@ -62,5 +64,10 @@ public class Node {
                 ", incomingEdges=" + incomingEdges.size() +
                 ", outgoingEdges=" + outgoingEdges.size() +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Node other) {
+        return Double.compare(this.minDistance, other.minDistance);
     }
 }

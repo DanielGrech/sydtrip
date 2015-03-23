@@ -5,7 +5,6 @@ import com.dgsd.sydtrip.transformer.gtfs.model.target.Stop;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 import org.mockito.Mockito;
 import org.supercsv.io.CsvListReader;
 import org.supercsv.prefs.CsvPreference;
@@ -46,8 +45,11 @@ public class RoutingTest {
             List<String> nextLine;
             while ((nextLine = reader.read()) != null) {
                 final Stop stop = Mockito.mock(Stop.class);
+
                 Mockito.when(stop.getId()).thenReturn(Integer.valueOf(nextLine.get(0)));
                 Mockito.when(stop.getName()).thenReturn(nextLine.get(2));
+                Mockito.when(stop.getLat()).thenReturn(Float.valueOf(nextLine.get(3)));
+                Mockito.when(stop.getLng()).thenReturn(Float.valueOf(nextLine.get(4)));
 
                 retval.put(stop.getId(), stop);
             }
@@ -80,19 +82,19 @@ public class RoutingTest {
         return graph;
     }
 
-    @Test
-    public void testRoutingDirect() {
-        final int startNode = 485; // Quakers Hill
-//        final int endNode = 6945; // Marayong
-        final int endNode = 2978; // Blacktown
-        graph.findPath(startNode, endNode, stopMap).stream().forEach(path -> {
-            path.stream()
-                    .map(n -> n.id)
-                    .map(id -> stopMap.get(id).getName() + "(" + id + ")")
-                    .forEach(System.out::println);
-            System.out.println("==========");
-        });
-    }
+//    @Test
+//    public void testRoutingDirect() {
+//        final int startNode = 485; // Quakers Hill
+////        final int endNode = 6945; // Marayong
+//        final int endNode = 2978; // Blacktown
+//        graph.findPath(startNode, endNode, stopMap).stream().forEach(path -> {
+//            path.stream()
+//                    .map(n -> n.id)
+//                    .map(id -> stopMap.get(id).getName() + "(" + id + ")")
+//                    .forEach(System.out::println);
+//            System.out.println("==========");
+//        });
+//    }
 
 //    @Ignore
 //    @Test
